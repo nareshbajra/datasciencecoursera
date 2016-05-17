@@ -1,0 +1,39 @@
+# Get data from files
+NEI <- readRDS("summarySCC_PM25.rds")
+
+# Separate by years and filter useless data
+NEI99 <- subset( NEI[, c("SCC","year","Emissions")] , year == 1999 )
+NEI02 <- subset( NEI[, c("SCC","year","Emissions")] , year == 2002 )
+NEI05 <- subset( NEI[, c("SCC","year","Emissions")] , year == 2005 )
+NEI08 <- subset( NEI[, c("SCC","year","Emissions")] , year == 2008 )
+
+# Preparate X axis (years)
+years     <- unique( NEI$year )
+
+# Calculate the average emissions in US for each year
+# The number of sources are not the same, thus, the average may be more representative
+emissions_ave <- numeric(length(years))
+emissions_ave[1] = mean ( NEI99$Emissions , na.rm=TRUE) 
+emissions_ave[2] = mean ( NEI02$Emissions , na.rm=TRUE) 
+emissions_ave[3] = mean ( NEI05$Emissions , na.rm=TRUE) 
+emissions_ave[4] = mean ( NEI08$Emissions , na.rm=TRUE) 
+
+# Calculate the total emissions in US for each year
+emissions <- numeric(length(years))
+emissions[1] = sum ( NEI99$Emissions , na.rm=TRUE)/1000.0 
+emissions[2] = sum ( NEI02$Emissions , na.rm=TRUE)/1000.0 
+emissions[3] = sum ( NEI05$Emissions , na.rm=TRUE)/1000.0 
+emissions[4] = sum ( NEI08$Emissions , na.rm=TRUE)/1000.0 
+
+# Create the figure
+png(file="plot1.png", width = 480, height = 480)
+par(mar = c(5, 4, 4, 4)) 
+plot( years , emissions     , main="Emissions of PM2.5" , xlab = "Years" , ylab = "" , type="l" , xaxt='n', yaxt='n', lwd=2 , col="blue" )
+axis(2,at=pretty(range(emissions)), col="blue",col.axis="blue")
+mtext("Total PM2.5 (Kilotons)", side=2, line=3, col="blue")
+axis(1,years,years)
+par(new = TRUE)
+plot( years , emissions_ave , type="l" , ylab="", xaxt='n' , yaxt='n' , lwd=2 , col="red" )
+axis(4,at=pretty(range(emissions_ave)), col="red",col.axis="red")
+mtext("Averaged PM2.5 per source", side=4, line=3, col="red")
+dev.off()
